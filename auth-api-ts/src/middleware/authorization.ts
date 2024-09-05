@@ -7,11 +7,6 @@ export function authorize(action:string) {
 		
 		const token = req.headers.authorization?.split(' ')[1];
 
-		if (!token) {
-			res.status(401).json({ message: 'Unauthorized' });
-			return;
-		}
-
 		//Token will be a jwt token (token already be validated on auth middleware)
 			//read token and
 		const userPermissions = ['decoded.permissions'];

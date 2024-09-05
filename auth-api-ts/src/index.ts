@@ -1,10 +1,10 @@
 import express from 'express';
 import usersRouter from './routes/users';
+import { authentication } from './middleware/authentication';
 
 const app = express();
 
-
-app.use('/api/users', usersRouter);
+app.use('/api/users', authentication(),usersRouter);
 
 const PORT = 3000;
 
