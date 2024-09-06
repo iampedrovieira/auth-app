@@ -11,12 +11,13 @@ export async function getUsers(req: Request, res: Response) {
 
 // This will receive a user email and return all info(permeissions, etc)
 export async function getUserInfo(req: Request, res: Response) {
-  const { token } = req.params;
-
+  //const { token } = req.params;
+    const token = 'token_bob_smith'
   const queryT =  `
   SELECT
-      u.name AS user_name,
+      u.name AS name,
       u.email AS user_email,
+      u.username as username,
       ARRAY_AGG(
           DISTINCT
           'Object: ' || o.name || '; Permissions: ' || p.name
@@ -43,12 +44,16 @@ export async function getUserInfo(req: Request, res: Response) {
       u.id, u.name, u.email;`;
   
   const testequery = await query(queryT);
+  if (testequery.rows.length === 0) {
+    res.status(404).json({message: "User not found"});
+    return;
+  }
   //Convert queryT resutl to JSON
   const userInfo = testequery.rows[0];
   //Format permissions like object-flag-flag-flag
 
   const result = {
-    user_name: userInfo.user_name,
+    user_name: userInfo.username,
     user_email: userInfo.user_email,
     permissions: convertPermissionsToJson(userInfo.permissions),
     providers: userInfo.providers

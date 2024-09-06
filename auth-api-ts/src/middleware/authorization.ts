@@ -9,14 +9,15 @@ export function authorize(action:string) {
 
 		//Token will be a jwt token (token already be validated on auth middleware)
 			//read token and
-		const userPermissions = ['decoded.permissions'];
-		//objetct will be on parms/query
-		const object = 'Document1';
+		const userPermissions = ['Document1-delete-edit_project', 'Document3-delete'];
+		console.log(userPermissions);
+		//object will be on parms/query
+		const object = 'Document3';
 		
 		if (isAuthorized(userPermissions, action, object)) {
 			next();
 		} else {
-			res.status(403).json({ message: 'Access denied' });
+			return res.status(403).json({ message: 'Access denied' });
 		}
 	};
 }
