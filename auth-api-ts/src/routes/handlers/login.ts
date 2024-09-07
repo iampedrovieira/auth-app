@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { dbQuery } from '../../db/db';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 
 export async function login(req: Request, res: Response) {
@@ -10,12 +11,16 @@ export async function login(req: Request, res: Response) {
       return res.status(400).json({ error: 'Bad Request' });
   }
   const query =  
-  `SELECT name, email, username FROM USERS WHERE username = '${username}' AND PASSWORD_HASH = '${password}' `;
+  `SELECT name, email, username, password_hash FROM USERS WHERE username = '${username}' `;
   const result = await dbQuery(query);
-  
+
   if (result.rowCount === 0) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }else{
+    const isPasswordValid = await bcrypt.compare(password, result.rows[0].password_hash);
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     const tokePayload = {  
       name: result.rows[0].name,
       email: result.rows[0].email,

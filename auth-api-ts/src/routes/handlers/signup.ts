@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { dbBeginTransaction, dbCommitTransaction, dbQuery, dbRollbackTransaction } from '../../db/db';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs'
 
 export async function signup(req: Request, res: Response) {
   const { username, password, email, name } = req.body;
@@ -8,9 +9,9 @@ export async function signup(req: Request, res: Response) {
   if (!username || !password || !email || !name) {
     return res.status(400).json({ error: 'Bad Request' });
   }
-  
+  const hashedPassword = await bcrypt.hash(password, 10);
   const query = `INSERT INTO USERS (username, password_hash, email, name) 
-  VALUES ('${username}', '${password}', '${email}', '${name}')`;
+  VALUES ('${username}', '${hashedPassword}', '${email}', '${name}')`;
   try {
 	
     await dbBeginTransaction();
