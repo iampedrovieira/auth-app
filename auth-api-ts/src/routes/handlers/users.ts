@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { query } from '../../db/db';
+import { dbQuery } from '../../db/db';
 import { isAuthorized} from '../../utils/authorization';
 import { convertPermissionsToJson } from '../../utils/permissions';
 
 
 export async function getUsers(req: Request, res: Response) {
-  const testequery = await query('SELECT * from users');
+  const testequery = await dbQuery('SELECT * from users');
   res.json({ teste: testequery.rows});
 }   
 
@@ -43,7 +43,7 @@ export async function getUserInfo(req: Request, res: Response) {
   GROUP BY
       u.id, u.name, u.email;`;
   
-  const testequery = await query(queryT);
+  const testequery = await dbQuery(queryT);
   if (testequery.rows.length === 0) {
     res.status(404).json({message: "User not found"});
     return;

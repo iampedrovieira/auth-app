@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
+import { login } from "./handlers/login";
+import { signup } from "./handlers/signup";
 
 
 const router = Router();
 
-router.get("/login",);
-router.get("/register",);
+router.post("/login",login);
+router.post("/signup",signup);
 //user routes
 router.get("/user/:username",authorize('read'),getUserInfo);
 router.get("/user",authorize('delete'),getUserInfo);
@@ -14,16 +16,6 @@ router.get("/user",authorize('delete'),getUserInfo);
 router.get("/user/permissions",getUserInfo);
     //specific object permissions
 router.get("/user/permissions/:object",getUserInfo);
-
-
-
-
-
-
-
-
-
-
 
 
 router.get('/status', (req, res) => {
