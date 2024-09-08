@@ -3,12 +3,19 @@ import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
 import { login } from "./handlers/login";
 import { signup } from "./handlers/signup";
+import { getObject } from "./handlers/object";
+import { authentication } from "../middleware/authentication";
 
 
 const router = Router();
 
 router.post("/login",login);
 router.post("/signup",signup);
+
+//Object routes
+
+router.get("/:object/read",authentication(),authorize('read'),getObject);
+
 //user routes
 router.get("/user/:username",authorize('read'),getUserInfo);
 router.get("/user",authorize('delete'),getUserInfo);
