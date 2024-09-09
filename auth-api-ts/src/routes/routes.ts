@@ -3,7 +3,7 @@ import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
 import { login } from "./handlers/login";
 import { signup } from "./handlers/signup";
-import { getObject } from "./handlers/object";
+import { deleteObject, getObject } from "./handlers/object";
 import { authentication } from "../middleware/authentication";
 
 
@@ -13,16 +13,18 @@ router.post("/login",login);
 router.post("/signup",signup);
 
 //Object routes
-
+//router.post("/:object/update",authorize('update'),getUserInfo);
 router.get("/:object/read",authentication(),authorize('read'),getObject);
-
+router.delete("/:object/delete",authentication(),authorize('delete'),deleteObject);
+//router.post("/:object/add",authorize('add'),getUserInfo);
+//router.post("/:object/remove",authorize('remove'),getUserInfo);
 //user routes
-router.get("/user/:username",authorize('read'),getUserInfo);
-router.get("/user",authorize('delete'),getUserInfo);
+//router.get("/user/:username",authorize('read'),getUserInfo);
+//router.get("/user",authorize('delete'),getUserInfo);
     //all permissions
-router.get("/user/permissions",getUserInfo);
+//router.get("/user/permissions",getUserInfo);
     //specific object permissions
-router.get("/user/permissions/:object",getUserInfo);
+//router.get("/user/permissions/:object",getUserInfo);
 
 
 router.get('/status', (req, res) => {

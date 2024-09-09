@@ -35,7 +35,7 @@ export function authorize(action:string) {
       if (result.rows[0].permissions == null) {
 
         //In the future will have a flag that to put objcet visible or not for everyone
-        return res.status(404).json({ message: 'Object not found' });
+        return res.status(404).json({ message: 'Object not found or not permissions to read the object' });
       }
   
       const userPermissions = convertPermissionsToJson(result.rows[0].permissions)
