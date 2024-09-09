@@ -97,9 +97,84 @@ export async function addUserToObject(req: Request, res: Response) {
       }
 
       }catch (error) {
-        console.log(error);
+        dbCommitTransaction();
         return res.status(500).json({ error: 'Internal Server Error' });
       }
+  }
+
+  return res.status(200).json({ permissionsDetails: permissionsDetails });
+}
+
+export async function removeUserFromObject(req: Request, res: Response) {
+  const { object } = req.params;
+  const { username, permissions } = req.body;
+
+  if (!username || !permissions) {
+    return res.status(400).json({ error: 'Bad Request' });
+  }
+
+  const permissionsDetails: {[key:string]:string} []= [];
+  
+  for (const permission of permissions) {
+    // Check if the permission exists in the permissions table
+
+    if (permission === 'remove-all') {
+
+      const removeAllUserPermissionsQuery = `
+        DELETE FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}')
+      `;
+      dbBeginTransaction();
+      await dbQuery(removeAllUserPermissionsQuery);
+      dbCommitTransaction();
+      permissionsDetails.push({[permission]: 'All user permissions removed'});
+      break;
+    }
+    const checkPermissionQuery = `
+      SELECT id FROM permissions WHERE name = '${permission}'
+    `;
+
+    try {
+      const permissionResult = await dbQuery(checkPermissionQuery);
+      if (permissionResult.rowCount === 0) {
+        // Remove the user's permission for the object
+        const removeUserPermissionQuery = `
+        DELETE FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
+      `;
+
+        dbBeginTransaction();
+        await dbQuery(removeUserPermissionQuery);
+        dbCommitTransaction();
+        permissionsDetails.push({[permission]: 'Permission not exists'});
+        continue;
+      }
+
+      // Check if the user has the permission for the object
+      const checkUserPermissionQuery = `
+        SELECT * FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
+      `;
+
+      const userPermissionResult = await dbQuery(checkUserPermissionQuery);
+
+      if (userPermissionResult.rowCount === 0) {
+        permissionsDetails.push({[permission]: 'User does not have this permission'});
+        continue;
+      }
+
+      // Remove the user's permission for the object
+      const removeUserPermissionQuery = `
+        DELETE FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
+      `;
+
+      dbBeginTransaction();
+      await dbQuery(removeUserPermissionQuery);
+      dbCommitTransaction();
+      permissionsDetails.push({[permission]: 'Permission removed'});
+
+    } catch (error) {
+      dbCommitTransaction();
+      return res.status(500).json({ error: 'Internal Server Error' });
+      
+    }
   }
 
   return res.status(200).json({ permissionsDetails: permissionsDetails });
