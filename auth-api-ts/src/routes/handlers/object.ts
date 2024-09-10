@@ -179,3 +179,61 @@ export async function removeUserFromObject(req: Request, res: Response) {
 
   return res.status(200).json({ permissionsDetails: permissionsDetails });
 }
+
+export async function updateObject(req: Request, res: Response) {
+  const { object } = req.params;
+  const { description } = req.body;
+
+  if (!description) {
+    return res.status(400).json({ error: 'Bad Request' });
+  }
+
+  const updateQuery = `
+    UPDATE objects SET description = '${description}' WHERE name = '${object}'
+  `;
+  try {
+    const result = await dbQuery(updateQuery);
+    if (result.rowCount === 0) {
+      res.status(404).json({ message: "Object not found" });
+      return;
+    }
+    return res.status(200).json({ message: 'Object updated' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+export async function createObject(req: Request, res: Response) {
+  const { description } = req.body;
+
+  if (!description) {
+    return res.status(400).json({ error: 'Bad Request' });
+  }
+
+  const currentDate = new Date();
+  const name = `object_${currentDate.getTime()}`;
+
+  const checkObjectQuery = `
+    SELECT * FROM objects WHERE name = '${name}'
+  `;
+
+  try {
+    const objectResult = await dbQuery(checkObjectQuery);
+    console.log(objectResult);
+    if (objectResult.rowCount === 0) {
+      const insertObjectQuery = `
+      INSERT INTO objects (name, description) VALUES ('${name}', '${description}')
+    `;
+      const result = await dbQuery(insertObjectQuery);
+      
+      return res.status(201).json({ message: 'Object created',
+        objectDetails: {name: name, description: description}
+      });
+    }else{
+      return res.status(409).json({ error: 'Object already exists' });
+    }
+
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+}

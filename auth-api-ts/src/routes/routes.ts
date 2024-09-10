@@ -3,7 +3,7 @@ import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
 import { login } from "./handlers/login";
 import { signup } from "./handlers/signup";
-import { addUserToObject, deleteObject, getObject, removeUserFromObject } from "./handlers/object";
+import { addUserToObject, createObject, deleteObject, getObject, removeUserFromObject, updateObject } from "./handlers/object";
 import { authentication } from "../middleware/authentication";
 
 
@@ -13,11 +13,12 @@ router.post("/login",login);
 router.post("/signup",signup);
 
 //Object routes
-//router.post("/:object/update",authorize('update'),getUserInfo);
+router.put("/:object/update",authentication(),authorize('update'),updateObject);
 router.get("/:object/read",authentication(),authorize('read'),getObject);
 router.delete("/:object/delete",authentication(),authorize('delete'),deleteObject);
 router.post("/:object/add",authentication(),authorize('add'),addUserToObject);
 router.delete("/:object/remove",authentication(),authorize('remove'),removeUserFromObject);
+router.post("/create-object",authentication(),createObject);
 //user routes
 //router.get("/user/:username",authorize('read'),getUserInfo);
 //router.get("/user",authorize('delete'),getUserInfo);
