@@ -1,9 +1,12 @@
 import express from 'express';
 import router from './routes/routes';
-import { authentication } from './middleware/authentication';
+import path from 'path';
+
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '/../public')));
 
 app.use('/api',router);
 

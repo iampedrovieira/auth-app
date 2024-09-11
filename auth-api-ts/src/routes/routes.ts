@@ -1,14 +1,15 @@
 import { Router } from "express";
 import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
-import { login } from "./handlers/login";
-import { signup } from "./handlers/signup";
+import { getLogin, login } from "./handlers/login";
+import { signup,getSignup } from "./handlers/signup";
 import { addUserToObject, createObject, deleteObject, getObject, removeUserFromObject, updateObject } from "./handlers/object";
 import { authentication } from "../middleware/authentication";
 
 
 const router = Router();
-
+router.get("/auth/login",getLogin);
+router.get("/auth/signup",getSignup);
 router.post("/login",login);
 router.post("/signup",signup);
 
