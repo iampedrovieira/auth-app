@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { dbBeginTransaction, dbCommitTransaction, dbQuery, dbRollbackTransaction } from '../../db/db';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs'
+import path from 'path';
 
 export async function signup(req: Request, res: Response) {
   const { username, password, email, name } = req.body;
@@ -59,3 +60,8 @@ export async function signup(req: Request, res: Response) {
     }
   }
 };
+
+export async function getSignup(req: Request, res: Response) {
+
+  res.sendFile(path.join(__dirname, '../../../public/signup-page/'));
+}
