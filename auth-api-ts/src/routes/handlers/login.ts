@@ -53,8 +53,7 @@ export async function login(req: Request, res: Response) {
         res.cookie('token', token, {
           httpOnly: true, 
           maxAge: 24 * 60 * 60 * 1000, 
-          //secure: process.env.NODE_ENV === 'production', // Somente em HTTPS em produção
-          sameSite: 'strict',  // Protege contra CSRF
+          sameSite: 'strict',
         });
         return res.status(200).json(jsonResponse);
       }
