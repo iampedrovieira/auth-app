@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { dbQuery } from '../../db/db';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import path from 'path';
+import bcrypt from 'bcryptjs';    
 
 export async function login(req: Request, res: Response) {
   const { username, password } = req.body;
+  const contentType = req.headers['content-type'];
 
   if (!username || !password) {
       return res.status(400).json({ error: 'Bad Request' });
@@ -15,11 +15,19 @@ export async function login(req: Request, res: Response) {
   const result = await dbQuery(query);
 
   if (result.rowCount === 0) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    if (contentType && contentType.includes('application/json')) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    } else {
+      return res.render('login', { error: 'Invalid credentials',username: username})
+    }
   }else{
     const isPasswordValid = await bcrypt.compare(password, result.rows[0].password_hash);
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      if (contentType && contentType.includes('application/json')) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      } else {
+        return res.render('login', { error: 'Invalid credentials',username: username})
+      }
     }
     const tokePayload = {  
       name: result.rows[0].name,
@@ -31,12 +39,23 @@ export async function login(req: Request, res: Response) {
       ` UPDATE USERS SET TOKEN = '${token}' WHERE username = '${username}'`;
       const resultUpdate = await dbQuery(queryUpdate);
       if (resultUpdate.rowCount === 0) {
-        return res.status(500).json({ error: 'Internal Server Error' });
+        if (contentType && contentType.includes('application/json')) {
+          return res.status(401).json({ error: 'Internal Server Error' });
+        } else {
+          return res.render('login', { error: 'Internal Server Error',username: username})
+        }
       }else{
         const jsonResponse = {
           msg:'OK',
           token: token
         };
+
+        res.cookie('token', token, {
+          httpOnly: true, 
+          maxAge: 24 * 60 * 60 * 1000, 
+          //secure: process.env.NODE_ENV === 'production', // Somente em HTTPS em produção
+          sameSite: 'strict',  // Protege contra CSRF
+        });
         return res.status(200).json(jsonResponse);
       }
   }
@@ -44,5 +63,5 @@ export async function login(req: Request, res: Response) {
 
 export async function getLogin(req: Request, res: Response) {
 
-  res.sendFile(path.join(__dirname, '../../../public/login-page/'));
+  return res.render('login', { error: null,username: null });
 }

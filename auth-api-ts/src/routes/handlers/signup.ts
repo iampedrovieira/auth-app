@@ -42,6 +42,11 @@ export async function signup(req: Request, res: Response) {
         msg: 'User created',
         token: token
       };
+      res.cookie('token', token, {
+        httpOnly: true, 
+        maxAge: 24 * 60 * 60 * 1000, 
+        sameSite: 'strict',  
+      });
       return res.status(201).json(jsonResponse);
     }
 
@@ -63,5 +68,5 @@ export async function signup(req: Request, res: Response) {
 
 export async function getSignup(req: Request, res: Response) {
 
-  res.sendFile(path.join(__dirname, '../../../public/signup-page/'));
+  return res.render('signup', { error: null,username: null });
 }
