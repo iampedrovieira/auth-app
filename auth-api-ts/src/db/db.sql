@@ -64,3 +64,12 @@ CREATE TABLE public.user_permissions (
     permission_id INT REFERENCES public.permissions(id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, object_id, permission_id)
 );
+
+-- Insert into permissions table
+INSERT INTO permissions (name, description) VALUES
+('read', 'Permission to read data'),
+('write', 'Permission to write data'),
+('delete', 'Permission to delete data'),
+('update', 'Permission to update data'),
+('add', 'Permission to add data user or permission on user'),
+('remove', 'Permission to remove data user or permission on user');
