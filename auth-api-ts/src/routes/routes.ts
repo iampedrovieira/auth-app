@@ -36,7 +36,7 @@ router.get('/status', (req, res) => {
       "Ka-chow! The API is running like a champ.",
       "The API is always there for you, just like Barney's suit."
     ]
-      res.send(messages[Math.floor(Math.random() * messages.length)]);
+      res.status(200).send({message:messages[Math.floor(Math.random() * messages.length)]});
   });
 
 export default router;
