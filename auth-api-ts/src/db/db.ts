@@ -9,10 +9,9 @@ const pool = new Pool({
   port: 5432, 
 });
 
-let client: PoolClient;
 
-export const dbQuery = async (text: string, params?: any[]) => {
-  const client = await pool.connect();
+export const dbQuery = async (text: string, client: PoolClient,params?: any[]) => {
+  
   try {
     const res = await client.query(text, params);
     return res;
@@ -22,16 +21,17 @@ export const dbQuery = async (text: string, params?: any[]) => {
 };
 
 export async function dbBeginTransaction() {
-  client = await pool.connect();
+  const client = await pool.connect();
   await client.query('BEGIN');
+  return client;
 }
 
-export async function dbCommitTransaction() {
+export async function dbCommitTransaction(client: PoolClient) {
   await client.query('COMMIT');
   client.release();
 }
 
-export async function dbRollbackTransaction() {
+export async function dbRollbackTransaction(client: PoolClient) {
   await client.query('ROLLBACK');
   client.release();
 }

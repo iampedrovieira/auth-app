@@ -1,23 +1,26 @@
 import { Request, Response } from 'express';
-import { dbBeginTransaction, dbQuery } from '../../db/db';
+import { dbBeginTransaction, dbCommitTransaction, dbQuery } from '../../db/db';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';    
 import { LoginDto } from '../../dto/Login.dto';
 import { ResponseDto } from '../../dto/Response.dto';
 import { UserRepository } from '../../services/userService';
+import { PoolClient } from 'pg';
 
 export async function login(req: Request<{},{},LoginDto>, res: Response<ResponseDto>,) {
   
   const username = req.body.username;
   const password = req.body.password;
   const contentType = req.headers['content-type'];
-
+  
   if (!username || !password) {
-      return res.status(400).json({ msg: 'Bad Request'});
+      
+    return res.status(400).json({ msg: 'Bad Request'});
   }
+  const client = await dbBeginTransaction();
   try{
-    dbBeginTransaction();
-    const result = await UserRepository.getUserByUsername(username);
+     
+    const result = await UserRepository.getUserByUsername(username,client);
 
     if (result.rowCount === 0) {
 
@@ -28,7 +31,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
      
         res.render('login', { msg: 'Invalid credentials',username: username})
       }
-      dbBeginTransaction();
+      dbCommitTransaction(client);
       return;
     }else{
       const isPasswordValid = await bcrypt.compare(password, result.rows[0].password_hash);
@@ -39,7 +42,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
         } else {
           res.render('login', { msg: 'Invalid credentials',username: username})
         }
-        dbBeginTransaction();
+        dbCommitTransaction(client);
         return;
       }
       const tokePayload = {  
@@ -48,14 +51,14 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
         username: result.rows[0].username  
       };
       const token = jwt.sign(tokePayload, 'SECRET_KEY', { expiresIn: '1h' });
-      const resultUpdate = await UserRepository.updateUserToken(username, token);
+      const resultUpdate = await UserRepository.updateUserToken(username, token,client);
       if (resultUpdate.rowCount === 0) {
         if (contentType && contentType.includes('application/json')) {
           res.status(401).json({ msg: 'Internal Server msg' });
         } else {
           res.render('login', { msg: 'Internal Server msg',username: username})
         }
-        dbBeginTransaction();
+        dbCommitTransaction(client);
         return;
       }else{
       
@@ -65,7 +68,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
           sameSite: 'strict',
         });
 
-        dbBeginTransaction();
+        dbCommitTransaction(client);
         return res.status(200).json({
           msg:'OK',
           token: token,
@@ -75,7 +78,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
 
   }catch(error){
     console.log(error);
-    dbBeginTransaction();
+    dbCommitTransaction(client);
     return res.status(500).json({ msg: 'Internal Server msg' });
   }
   

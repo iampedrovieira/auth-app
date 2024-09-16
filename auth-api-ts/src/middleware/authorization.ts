@@ -1,13 +1,14 @@
 
 import { Request, Response } from 'express';
 import { isAuthorized } from '../utils/authorization';
-import { dbQuery } from '../db/db';
+import { dbBeginTransaction, dbCommitTransaction, dbQuery } from '../db/db';
 import { convertPermissionsToJson } from '../utils/permissions';
 
 export function authorize(action:string) {
 	return async (req:Request, res:Response, next:Function) => {
 		const {object} = req.params;
 		const username = req.user.username;
+    const client = await dbBeginTransaction();
 
 		const query = `
       SELECT
@@ -30,8 +31,10 @@ export function authorize(action:string) {
       WHERE
                 u.username = '${username}'
           and  o.name = '${object}'`;
+
     try {
-      const result = await dbQuery(query);
+      
+      const result = await dbQuery(query, client);
       if (result.rows[0].permissions == null) {
 
         //In the future will have a flag that to put objcet visible or not for everyone
@@ -45,8 +48,9 @@ export function authorize(action:string) {
       } else {
         return res.status(403).json({ message: 'Access denied' });
       }
+      dbCommitTransaction(client);
     } catch (error) {
-
+      dbCommitTransaction(client);
       return res.status(500).json({ error: 'Internal Server Error' });
     } 
 

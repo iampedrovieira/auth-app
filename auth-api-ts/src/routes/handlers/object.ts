@@ -4,6 +4,7 @@ import { dbBeginTransaction, dbCommitTransaction, dbQuery } from '../../db/db';
 export async function getObject(req: Request, res: Response) {
 
   const {object} = req.params;
+  const client = await dbBeginTransaction();
 
   const query = `
     SELECT o.name, o.description, array_agg(DISTINCT u.username) as usernames
@@ -15,7 +16,7 @@ export async function getObject(req: Request, res: Response) {
   `;
 
   try {
-    const result = await dbQuery(query);
+    const result = await dbQuery(query,client);
     if (result.rowCount === 0) {
       res.status(404).json({message: "Object not found"});
       return;
@@ -31,13 +32,14 @@ export async function getObject(req: Request, res: Response) {
 export async function deleteObject(req: Request, res: Response) {
 
   const {object} = req.params;
+  const client = await dbBeginTransaction();
 
   const query = `
    DELETE FROM objects WHERE name = '${object}';
   `;
 
   try {
-    const result = await dbQuery(query);
+    const result = await dbQuery(query,client);
     console.log(result);
     if (result.rowCount === 0) {
       res.status(404).json({message: "Object not found"});
@@ -54,6 +56,7 @@ export async function deleteObject(req: Request, res: Response) {
 export async function addUserToObject(req: Request, res: Response) {
   const { object } = req.params;
   const { username, permissions } = req.body;
+  const client = await dbBeginTransaction();
 
   if (!username || !permissions) {
     return res.status(400).json({ error: 'Bad Request' });
@@ -68,7 +71,7 @@ export async function addUserToObject(req: Request, res: Response) {
     `;
 
     try {
-      const permissionResult = await dbQuery(checkPermissionQuery);
+      const permissionResult = await dbQuery(checkPermissionQuery,client);
       if (permissionResult.rowCount === 0) {
        
         permissionsDetails.push({[permission]: 'Permission not exists'});
@@ -80,16 +83,15 @@ export async function addUserToObject(req: Request, res: Response) {
         SELECT * FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
       `;
 
-      const userPermissionResult = await dbQuery(checkUserPermissionQuery);
+      const userPermissionResult = await dbQuery(checkUserPermissionQuery,client);
 
       if (userPermissionResult.rowCount === 0) {
         const insertUserPermissionQuery = `
           INSERT INTO user_permissions (user_id, object_id, permission_id) VALUES 
           ((SELECT id FROM users WHERE username = '${username}'), (SELECT id FROM objects WHERE name = '${object}'), ${permissionResult.rows[0].id})
         `;
-        dbBeginTransaction();
-        await dbQuery(insertUserPermissionQuery);
-        dbCommitTransaction();
+        await dbQuery(insertUserPermissionQuery,client);
+        dbCommitTransaction(client);
         permissionsDetails.push({[permission]: 'Permission added'});
       }else{
         permissionsDetails.push({[permission]: 'User already has this permission'});
@@ -97,7 +99,7 @@ export async function addUserToObject(req: Request, res: Response) {
       }
 
       }catch (error) {
-        dbCommitTransaction();
+        dbCommitTransaction(client);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
   }
@@ -114,7 +116,7 @@ export async function removeUserFromObject(req: Request, res: Response) {
   }
 
   const permissionsDetails: {[key:string]:string} []= [];
-  
+  const client = await dbBeginTransaction();
   for (const permission of permissions) {
     // Check if the permission exists in the permissions table
 
@@ -123,9 +125,9 @@ export async function removeUserFromObject(req: Request, res: Response) {
       const removeAllUserPermissionsQuery = `
         DELETE FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}')
       `;
-      dbBeginTransaction();
-      await dbQuery(removeAllUserPermissionsQuery);
-      dbCommitTransaction();
+    
+      await dbQuery(removeAllUserPermissionsQuery,client);
+      dbCommitTransaction(client);
       permissionsDetails.push({[permission]: 'All user permissions removed'});
       break;
     }
@@ -134,16 +136,15 @@ export async function removeUserFromObject(req: Request, res: Response) {
     `;
 
     try {
-      const permissionResult = await dbQuery(checkPermissionQuery);
+      const permissionResult = await dbQuery(checkPermissionQuery,client);
       if (permissionResult.rowCount === 0) {
         // Remove the user's permission for the object
         const removeUserPermissionQuery = `
         DELETE FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
       `;
 
-        dbBeginTransaction();
-        await dbQuery(removeUserPermissionQuery);
-        dbCommitTransaction();
+        await dbQuery(removeUserPermissionQuery,client);
+        dbCommitTransaction(client);
         permissionsDetails.push({[permission]: 'Permission not exists'});
         continue;
       }
@@ -153,7 +154,7 @@ export async function removeUserFromObject(req: Request, res: Response) {
         SELECT * FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
       `;
 
-      const userPermissionResult = await dbQuery(checkUserPermissionQuery);
+      const userPermissionResult = await dbQuery(checkUserPermissionQuery,client);
 
       if (userPermissionResult.rowCount === 0) {
         permissionsDetails.push({[permission]: 'User does not have this permission'});
@@ -165,13 +166,13 @@ export async function removeUserFromObject(req: Request, res: Response) {
         DELETE FROM user_permissions WHERE user_id = (SELECT id FROM users WHERE username = '${username}') AND object_id = (SELECT id FROM objects WHERE name = '${object}') AND permission_id = ${permissionResult.rows[0].id}
       `;
 
-      dbBeginTransaction();
-      await dbQuery(removeUserPermissionQuery);
-      dbCommitTransaction();
+  
+      await dbQuery(removeUserPermissionQuery,client);
+      dbCommitTransaction(client);
       permissionsDetails.push({[permission]: 'Permission removed'});
 
     } catch (error) {
-      dbCommitTransaction();
+      dbCommitTransaction(client);
       return res.status(500).json({ error: 'Internal Server Error' });
       
     }
@@ -183,7 +184,7 @@ export async function removeUserFromObject(req: Request, res: Response) {
 export async function updateObject(req: Request, res: Response) {
   const { object } = req.params;
   const { description } = req.body;
-
+  const client = await dbBeginTransaction();
   if (!description) {
     return res.status(400).json({ error: 'Bad Request' });
   }
@@ -192,7 +193,7 @@ export async function updateObject(req: Request, res: Response) {
     UPDATE objects SET description = '${description}' WHERE name = '${object}'
   `;
   try {
-    const result = await dbQuery(updateQuery);
+    const result = await dbQuery(updateQuery,client);
     if (result.rowCount === 0) {
       res.status(404).json({ message: "Object not found" });
       return;
@@ -205,7 +206,7 @@ export async function updateObject(req: Request, res: Response) {
 
 export async function createObject(req: Request, res: Response) {
   const { description } = req.body;
-
+  const client = await dbBeginTransaction();
   if (!description) {
     return res.status(400).json({ error: 'Bad Request' });
   }
@@ -218,22 +219,23 @@ export async function createObject(req: Request, res: Response) {
   `;
 
   try {
-    const objectResult = await dbQuery(checkObjectQuery);
+    const objectResult = await dbQuery(checkObjectQuery,client);
     console.log(objectResult);
     if (objectResult.rowCount === 0) {
       const insertObjectQuery = `
       INSERT INTO objects (name, description) VALUES ('${name}', '${description}')
     `;
-      const result = await dbQuery(insertObjectQuery);
+      const result = await dbQuery(insertObjectQuery,client);
       
-      return res.status(201).json({ message: 'Object created',
+        res.status(201).json({ message: 'Object created',
         objectDetails: {name: name, description: description}
       });
     }else{
-      return res.status(409).json({ error: 'Object already exists' });
+      res.status(409).json({ error: 'Object already exists' });
     }
-
+    dbCommitTransaction(client);
   } catch (error) {
+    dbCommitTransaction(client);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
