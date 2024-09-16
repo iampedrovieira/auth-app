@@ -1,7 +1,7 @@
 
 import { Request} from 'express-serve-static-core';
 
-export const mockRequest = {
+export const loginMockRequest = {
   body: {
     username: 'teste',
     password: 'teste'

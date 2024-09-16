@@ -14,8 +14,12 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
   const contentType = req.headers['content-type'];
   
   if (!username || !password) {
+    if (contentType && contentType.includes('application/json')) {
+      return res.status(400).json({ msg: 'Bad Request'});
       
-    return res.status(400).json({ msg: 'Bad Request'});
+    } else {
+      return res.status(400).render('login', { msg: 'Bad Request'})
+    }
   }
   const client = await dbBeginTransaction();
   try{
@@ -29,7 +33,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
         
       } else {
      
-        res.render('login', { msg: 'Invalid credentials',username: username})
+        res.status(401).render('login', { msg: 'Invalid credentials',username: username})
       }
       dbCommitTransaction(client);
       return;
@@ -40,7 +44,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
         if (contentType && contentType.includes('application/json')) {
           res.status(401).json({ msg: 'Invalid credentials' });
         } else {
-          res.render('login', { msg: 'Invalid credentials',username: username})
+          res.status(401).render('login', { msg: 'Invalid credentials',username: username})
         }
         dbCommitTransaction(client);
         return;
@@ -54,9 +58,9 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
       const resultUpdate = await UserRepository.updateUserToken(username, token,client);
       if (resultUpdate.rowCount === 0) {
         if (contentType && contentType.includes('application/json')) {
-          res.status(401).json({ msg: 'Internal Server msg' });
+          res.status(401).json({ msg: 'Internal Erro' });
         } else {
-          res.render('login', { msg: 'Internal Server msg',username: username})
+          res.status(401).render('login', { msg: 'Internal Erro',username: username})
         }
         dbCommitTransaction(client);
         return;
@@ -77,9 +81,15 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
   }
 
   }catch(error){
-    console.log(error);
+   
     dbCommitTransaction(client);
-    return res.status(500).json({ msg: 'Internal Server msg' });
+    if (contentType && contentType.includes('application/json')) {
+      return res.status(500).json({ msg: 'Internal Error' });
+      
+    } else {
+      return res.status(500).render('login', { msg: 'Internal Error'})
+    }
+ 
   }
   
 };
