@@ -10,28 +10,42 @@ const pool = new Pool({
 });
 
 
-export const dbQuery = async (text: string, client: PoolClient,params?: any[]) => {
-  
+export const dbQuery = async (text: string, client: PoolClient, params?: any[]) => {
   try {
     const res = await client.query(text, params);
     return res;
-  } finally {
-    client.release();
+  } catch (err) {
+    throw err;
   }
 };
 
-export async function dbBeginTransaction() {
+export async function dbBeginTransaction(): Promise<PoolClient> {
   const client = await pool.connect();
-  await client.query('BEGIN');
-  return client;
+  try {
+    await client.query('BEGIN');
+    return client;
+  } catch (err) {
+    client.release();
+    throw err;
+  }
 }
 
-export async function dbCommitTransaction(client: PoolClient) {
-  await client.query('COMMIT');
-  client.release();
+export async function dbCommitTransaction(client: PoolClient): Promise<void> {
+  try {
+    await client.query('COMMIT');
+  } catch (err) {
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
-export async function dbRollbackTransaction(client: PoolClient) {
-  await client.query('ROLLBACK');
-  client.release();
+export async function dbRollbackTransaction(client: PoolClient): Promise<void> {
+  try {
+    await client.query('ROLLBACK');
+  } catch (err) {
+    throw err;
+  } finally {
+    client.release();
+  }
 }

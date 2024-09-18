@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import { UserRepository } from '../../services/userService';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { Pool } from "pg";
 
 jest.mock('../../services/userService', () => ({
   UserRepository: {
@@ -13,20 +14,9 @@ jest.mock('../../services/userService', () => ({
   },
 }));
 
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(),
-}));
-
-jest.mock('bcryptjs', () => ({
-  compare: jest.fn()
-}));
-
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(),
-}));
-
 let req: Partial<Request>;
 let res: Partial<Response>;
+let pool: any;
 let client;
 
 describe('Login function with JSON data', () => {
@@ -37,10 +27,16 @@ describe('Login function with JSON data', () => {
 		client = {
       query: jest.fn(),
     };
+		pool = new Pool();
+    client = pool.connect();
   });
 
 	afterEach(() => {
     jest.clearAllMocks();
+  });
+
+	afterAll(async () => {
+    await pool.end();
   });
   
 	it('should return 400 if username or password is missing', async () => {
