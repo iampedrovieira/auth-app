@@ -3,9 +3,9 @@ import { Pool, PoolClient } from 'pg';
 
 const pool = new Pool({
   user: 'postgres',
-  host: '172.17.0.3',
-  database: 'auth_db',
-  password: 'test',
+  host: 'db',
+  database: 'auth-api-ci-cd',
+  password: 'postgres',
   port: 5432, 
 });
 

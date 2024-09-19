@@ -1,8 +1,8 @@
 -- Create the database
-CREATE DATABASE my_database;
+CREATE DATABASE auth-api-ci-cd;
 
 -- Connect to the database
-\c my_database;
+\c auth-api-ci-cd;
 
 -- Create tables
 CREATE TABLE public.users (
