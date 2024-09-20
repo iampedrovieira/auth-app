@@ -28,23 +28,24 @@ jobs:
         docker-compose --version
 
     - name: Set up Docker Compose
+      working-directory: ./Docker
       run: |
         docker-compose up -d
-      working-directory: Docker
+      
 
     - name: Install Dependencies
+      working-directory: ./Docker
       run: docker-compose exec app sh -c "npm install"
-      working-directory: Docker
     
     - name: Run Linter
+      working-directory: ./Docker
       run: docker-compose exec app sh -c "npm run lint"
-      working-directory: Docker
       continue-on-error: true
       
     - name: Run Unit Tests
+      working-directory: ./Docker
       run: docker-compose exec app sh -c "npm run test:unit"
-      working-directory: Docker
 
     - name: Run Integration Tests
+      working-directory: ./Docker
       run: docker-compose exec app sh -c "npm run test:e2e"
-      working-directory: Docker
