@@ -18,7 +18,7 @@ services:
     container_name: CI-CD-App
     working_dir: /usr/src/app
     volumes:
-      - ./../auth-api-ts/:/usr/src/app
+      - app:/usr/src/app
     depends_on:
       - db
     networks:
@@ -33,7 +33,14 @@ services:
       - DATABASE_PORT=${DATABASE_PORT}"
       - DATABASE_NAME=${DATABASE_NAME}
     command: sh -c "npm install && npm run start:dev"
-
+volumes:
+  app:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/../auth-api-ts/
+    name: app
 networks:
   mynetwork:
     driver: bridge
