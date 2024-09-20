@@ -32,6 +32,13 @@ jobs:
       working-directory: Docker
       run: |
         docker-compose up -d
+    
+    - name: Check docker volume
+      working-directory: Docker
+      run: docker-compose exec app sh -c "ls -la /usr/src/app"
+
+    - name: Check memory usage
+      run: docker stats --no-stream
 
     - name: Check docker volume
       working-directory: Docker
