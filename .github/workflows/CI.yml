@@ -23,6 +23,7 @@ jobs:
       uses: actions/checkout@v2
       
     - name: Verify Docker Installation
+      working-directory: Docker
       run : |
         docker --version
         docker-compose --version
