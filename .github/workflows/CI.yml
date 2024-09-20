@@ -32,6 +32,14 @@ jobs:
       working-directory: Docker
       run: |
         docker-compose up -d
+        
+    - name: Check Docker Compose services status
+      working-directory: Docker
+      run: docker-compose ps
+
+    - name: Check Docker Compose logs
+      working-directory: Docker
+      run: docker-compose logs app
     
     - name: Check docker volume
       working-directory: Docker
