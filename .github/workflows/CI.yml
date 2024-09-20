@@ -26,6 +26,7 @@ jobs:
       run : |
         docker --version
         docker-compose --version
+        ls
 
     - name: Set up Docker Compose
       working-directory: ./Docker
