@@ -35,7 +35,7 @@ jobs:
 
     - name: Check Docker Compose services status
       working-directory: Docker
-      run: docker-compose ps
+      run: docker volume ls
 
     - name: Check Docker Compose logs
       working-directory: Docker
