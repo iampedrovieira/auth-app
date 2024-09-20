@@ -30,24 +30,24 @@ jobs:
         ls
 
     - name: Set up Docker Compose
-      working-directory: ./Docker
+      working-directory: Docker
       run: |
         docker-compose up -d
       
 
     - name: Install Dependencies
-      working-directory: ./Docker
+      working-directory: Docker
       run: docker-compose exec app sh -c "npm install"
     
     - name: Run Linter
-      working-directory: ./Docker
+      working-directory: Docker
       run: docker-compose exec app sh -c "npm run lint"
       continue-on-error: true
       
     - name: Run Unit Tests
-      working-directory: ./Docker
+      working-directory: Docker
       run: docker-compose exec app sh -c "npm run test:unit"
 
     - name: Run Integration Tests
-      working-directory: ./Docker
+      working-directory: Docker
       run: docker-compose exec app sh -c "npm run test:e2e"
