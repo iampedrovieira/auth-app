@@ -21,6 +21,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: List files in root directory
+      run: ls -la
+     
+    - name: List files in Docker directory
+      run: ls -la Docker
       
     - name: Verify Docker Installation
       working-directory: Docker
@@ -28,6 +33,9 @@ jobs:
         docker --version
         docker-compose --version
         ls
+       
+    - name: Verify docker-compose.yml exists
+      run: cat Docker/docker-compose.yml
 
     - name: Set up Docker Compose
       working-directory: Docker
