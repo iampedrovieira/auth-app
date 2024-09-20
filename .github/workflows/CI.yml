@@ -8,6 +8,15 @@ jobs:
     container:
       image: docker:latest
       options: --privileged
+    
+    env:
+      API_PORT: 3000
+      DATABASE_PROVIDER: postgres
+      DATABASE_HOST: db
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_NAME: auth-api-ci-cd
+      DATABASE_PORT: 5432
 
     steps:
     - name: Checkout code
@@ -19,23 +28,23 @@ jobs:
         docker-compose --version
 
     - name: Set up Docker Compose
-      run: cd Docker && docker-compose up -d ## Run the docker-compose to build the app and db containers
-      env:
-        DB_USER: postgres
-        DB_PASSWORD: postgres
-        DB_HOST: db
-        DB_PORT: 5432
-        DB_NAME: auth-api-ci-cd
+      run: |
+        docker-compose up -d
+      working-directory: Docker
 
     - name: Install Dependencies
-      run: cd Docker && docker-compose exec app sh -c "npm install"
+      run: docker-compose exec app sh -c "npm install"
+      working-directory: Docker
     
     - name: Run Linter
-      run: cd Docker && docker-compose exec app sh -c "npm run lint"
+      run: docker-compose exec app sh -c "npm run lint"
+      working-directory: Docker
       continue-on-error: true
       
     - name: Run Unit Tests
-      run: cd Docker && docker-compose exec app sh -c "npm run test:unit"
+      run: docker-compose exec app sh -c "npm run test:unit"
+      working-directory: Docker
 
     - name: Run Integration Tests
-      run: cd Docker && docker-compose exec app sh -c "npm run test:e2e"
+      run: docker-compose exec app sh -c "npm run test:e2e"
+      working-directory: Docker
