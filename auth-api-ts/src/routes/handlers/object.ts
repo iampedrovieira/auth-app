@@ -91,19 +91,19 @@ export async function addUserToObject(req: Request, res: Response) {
           ((SELECT id FROM users WHERE username = '${username}'), (SELECT id FROM objects WHERE name = '${object}'), ${permissionResult.rows[0].id})
         `;
         await dbQuery(insertUserPermissionQuery,client);
-        dbCommitTransaction(client);
+        
         permissionsDetails.push({[permission]: 'Permission added'});
       }else{
         permissionsDetails.push({[permission]: 'User already has this permission'});
         continue;
       }
-
+      
       }catch (error) {
         dbCommitTransaction(client);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
   }
-
+  dbCommitTransaction(client);
   return res.status(200).json({ permissionsDetails: permissionsDetails });
 }
 

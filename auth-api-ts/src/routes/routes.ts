@@ -1,10 +1,11 @@
-import { Router } from "express";
+import e, { Router } from "express";
 import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
 import { getLogin, login } from "./handlers/login";
 import { signup,getSignup } from "./handlers/signup";
 import { addUserToObject, createObject, deleteObject, getObject, removeUserFromObject, updateObject } from "./handlers/object";
 import { authentication } from "../middleware/authentication";
+import { dbBeginTransaction, dbCommitTransaction, dbQuery } from "../db/db";
 
 
 const router = Router();
@@ -38,5 +39,28 @@ router.get('/status', (req, res) => {
     ]
       res.status(200).send({message:messages[Math.floor(Math.random() * messages.length)]});
   });
+
+router.get('/statusdb', async(req, res) => {
+  const query = `select * from permissions where name = 'read'`;
+  try {
+    console.log('statusdb');
+    const client = await dbBeginTransaction();
+    console.log('statusdbdd');
+    const result = await dbQuery(query,client);
+
+    await dbCommitTransaction(client);
+    if (result.rowCount === 0) {
+      return res.status(404).send({error: 'Semitop'});
+    }else{
+      return res.status(200).send({error: 'TOP'});
+    }
+
+  }catch (error) {
+    console.log(error);
+    return res.status(500).send({error: 'Internal Server Error'});
+  }
+ 
+  
+});
 
 export default router;

@@ -1,8 +1,8 @@
 -- Create the database
-CREATE DATABASE auth-api-ci-cd;
+--CREATE DATABASE auth-api-ci-cd; not needed because the database is created in the docker-compose file
 
 -- Connect to the database
-\c auth-api-ci-cd;
+--\c auth-api-ci-cd; not needed because the database is created in the docker-compose file
 
 -- Create tables
 CREATE TABLE public.users (
@@ -44,7 +44,8 @@ CREATE TABLE public.user_roles (
 
 CREATE TABLE public.permissions (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE public.role_permissions (
