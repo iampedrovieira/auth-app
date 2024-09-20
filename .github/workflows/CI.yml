@@ -1,0 +1,41 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: docker:latest
+      options: --privileged
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Verify Docker Installation
+      run : |
+        docker --version
+        docker-compose --version
+
+    - name: Set up Docker Compose
+      run: cd Docker && docker-compose up -d ## Run the docker-compose to build the app and db containers
+      env:
+        DB_USER: postgres
+        DB_PASSWORD: postgres
+        DB_HOST: db
+        DB_PORT: 5432
+        DB_NAME: auth-api-ci-cd
+
+    - name: Install Dependencies
+      run: cd Docker && docker-compose exec app sh -c "npm install"
+    
+    - name: Run Linter
+      run: cd Docker && docker-compose exec app sh -c "npm run lint"
+      continue-on-error: true
+      
+    - name: Run Unit Tests
+      run: cd Docker && docker-compose exec app sh -c "npm run test:unit"
+
+    - name: Run Integration Tests
+      run: cd Docker && docker-compose exec app sh -c "npm run test:e2e"
