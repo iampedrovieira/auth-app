@@ -36,7 +36,7 @@ jobs:
     - name: Set up Docker Compose
       working-directory: Docker
       run: |
-        docker-compose up -d
+        docker-compose up
 
     - name: Check Docker Compose services status
       working-directory: Docker
