@@ -33,7 +33,7 @@ services:
       - DATABASE_HOST=db
       - DATABASE_PORT=${DATABASE_PORT}"
       - DATABASE_NAME=${DATABASE_NAME}
-    command: sh -c "cd db/ && ls -la"
+    command: sh -c "cd db/ && ls"
 
 networks:
   mynetwork:
