@@ -1,25 +1,10 @@
 services:
-  db:
-    image: postgres:latest
-    container_name: CI-CD-DB-Postgres
-    environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-    ports:
-      - "5433:${DATABASE_PORT}"
-    networks:
-      - mynetwork
-
   app:
     image: node:latest
     container_name: app
     working_dir: /usr/src/app/
     volumes:
       - .:/usr/src/app
-    
-    depends_on:
-      - db
     networks:
       - mynetwork
     ports:
