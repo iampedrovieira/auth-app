@@ -17,6 +17,7 @@ jobs:
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: auth-api-ci-cd
       DATABASE_PORT: 5432
+      PROJECT_ROOT: ${{ github.workspace }}
 
     steps:
     - name: Checkout code
@@ -41,34 +42,34 @@ jobs:
       working-directory: Docker
       run: docker-compose logs app
     
-    #- name: Check docker volume
-    #  working-directory: Docker
-    #  run: docker-compose exec app sh -c "ls -la /usr/src/app"
+    - name: Check docker volume
+      working-directory: Docker
+      run: docker-compose exec app sh -c "ls -la /usr/src/app"
     
-    #- name: Check docker volume
-    #  working-directory: Docker
-    #  run: ls -la ./../
+    - name: Check docker volume
+      working-directory: Docker
+      run: ls -la ./../
 
-    #- name: Check memory usage
-    #  run: docker stats --no-stream
+    - name: Check memory usage
+      run: docker stats --no-stream
 
-    #- name: Check docker volume
-    #  working-directory: Docker
-    #  run: docker-compose exec app sh -c "ls"
+    - name: Check docker volume
+      working-directory: Docker
+      run: docker-compose exec app sh -c "ls"
 
-    #- name: Install Dependencies
-    #  working-directory: Docker
-    #  run: docker-compose exec app sh -c "npm install"
+    - name: Install Dependencies
+      working-directory: Docker
+      run: docker-compose exec app sh -c "npm install"
     
-    #- name: Run Linter
-    #  working-directory: Docker
-    #  run: docker-compose exec app sh -c "npm run lint"
-    #  continue-on-error: true
+    - name: Run Linter
+      working-directory: Docker
+      run: docker-compose exec app sh -c "npm run lint"
+      continue-on-error: true
       
-    #- name: Run Unit Tests
-    #  working-directory: Docker
-    #  run: docker-compose exec app sh -c "npm run test:unit"
+    - name: Run Unit Tests
+      working-directory: Docker
+      run: docker-compose exec app sh -c "npm run test:unit"
 
-    #- name: Run Integration Tests
-    #  working-directory: Docker
-    #  run: docker-compose exec app sh -c "npm run test:e2e"
+    - name: Run Integration Tests
+      working-directory: Docker
+      run: docker-compose exec app sh -c "npm run test:e2e"
