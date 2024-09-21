@@ -5,6 +5,9 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: docker:latest
+      options: --privileged
     
     env:
       API_PORT: 3000
@@ -38,6 +41,22 @@ jobs:
     - name: Check Docker Compose logs
       working-directory: Docker
       run: docker-compose logs app
+    
+    - name: Wait for app service to be up
+      working-directory: ${{ github.workspace }}/Docker
+      run: |
+        timeout=180
+        elapsed=0
+        interval=5
+        while ! docker-compose exec app sh -c "ls -la /usr/src/app"; do
+          if [ $elapsed -ge $timeout ]; then
+            echo "Timeout reached. The app service did not start within 3 minutes."
+            exit 1
+          fi
+          echo "Waiting for app service to be up..."
+          sleep $interval
+          elapsed=$((elapsed + interval))
+        done
     
     - name: Check docker volume
       working-directory: Docker

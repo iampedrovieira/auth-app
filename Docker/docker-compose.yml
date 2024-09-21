@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
-      - ./db:/docker-entrypoint-initdb.d
+      - ${PROJECT_ROOT}/db:/docker-entrypoint-initdb.d
     ports:
       - "5433:${DATABASE_PORT}"
     networks:
@@ -15,10 +15,10 @@ services:
 
   app:
     image: node:latest
-    container_name: CI-CD-App
-    working_dir: /usr/src/app
+    container_name: app
+    working_dir: /usr/src/app/
     volumes:
-      - ${PROJECT_ROOT}/../auth-api-ts:/usr/src/app
+      - ${PROJECT_ROOT}/auth-api-ts/:/usr/src/app
     
     depends_on:
       - db
