@@ -35,7 +35,7 @@ jobs:
 
     - name: Set up Docker Compose
       run: |
-        cd ${{ github.workspace }}/Docker/ && docker-compose up
+        cd ./Docker/ && docker-compose up
 
     - name: Check Docker Compose services status
       working-directory: Docker
