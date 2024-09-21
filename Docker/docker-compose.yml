@@ -16,9 +16,9 @@ services:
   app:
     image: node:latest
     container_name: CI-CD-App
-    working_dir: /usr/src/app
     volumes:
-      - ${PROJECT_ROOT}/../auth-api-ts:/usr/src/app
+      - ${PROJECT_ROOT}/../:/usr/src/app
+    working_dir: /usr/src/app/auth-api-ts
     depends_on:
       - db
     networks:
