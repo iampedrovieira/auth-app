@@ -29,6 +29,10 @@ jobs:
         docker --version
         docker-compose --version
 
+    - name: Check workspace path
+      working-directory: ${{ github.workspace }}
+      run: ls -la
+
     - name: Set up Docker Compose
       working-directory: Docker
       run: |
@@ -61,10 +65,6 @@ jobs:
     - name: Check docker volume
       working-directory: Docker
       run: docker-compose exec app sh -c "ls -la /usr/src/app"
-    
-    - name: Check docker volume
-      working-directory: Docker
-      run: ls -la ./../
 
     - name: Check memory usage
       run: docker stats --no-stream
