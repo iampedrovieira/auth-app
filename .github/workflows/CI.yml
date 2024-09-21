@@ -33,7 +33,6 @@ jobs:
       run: ls -la
 
     - name: Set up Docker Compose
-      working-directory: ${{ github.workspace }}
       run: |
        docker-compose up
 
