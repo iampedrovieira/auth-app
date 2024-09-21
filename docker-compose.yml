@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
-      - ${PROJECT_ROOT}/db:/docker-entrypoint-initdb.d
+      - ${PROJECT_ROOT}/db-2:/docker-entrypoint-initdb.d
     ports:
       - "5433:${DATABASE_PORT}"
     networks:
