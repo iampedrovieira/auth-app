@@ -34,8 +34,8 @@ jobs:
       run: ls -la
 
     - name: Set up Docker Compose
-      working-directory: Docker
       run: |
+        cd ${{ github.workspace }}/Docker
         docker-compose up
 
     - name: Check Docker Compose services status
