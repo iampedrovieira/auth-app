@@ -9,6 +9,9 @@ jobs:
     container:
       image: docker:latest
       options: --privileged
+    strategy:
+      matrix:
+        job: [lint, test]
     
     env:
       API_PORT: 3000
@@ -39,9 +42,14 @@ jobs:
       run: |
        docker-compose -f docker-compose.yml up -d
     
-    - name: Run Linter
+    - name: Run ${{ matrix.job }}
       working-directory: Docker
-      run: docker-compose exec app sh -c "npm run lint"
+      run: |
+          if [ "${{ matrix.job }}" == "lint" ]; then
+            docker-compose exec app sh -c "npm run lint"
+          elif [ "${{ matrix.job }}" == "test" ]; then
+            docker-compose exec app sh -c "npm run test:unit"
+          fi
       continue-on-error: true
       
     - name: Run Unit Tests
