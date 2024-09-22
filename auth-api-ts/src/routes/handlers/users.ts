@@ -3,13 +3,14 @@ import { dbQuery } from '../../db/db';
 import { isAuthorized} from '../../utils/authorization';
 import { convertPermissionsToJson } from '../../utils/permissions';
 
-
+/*
 export async function getUsers(req: Request, res: Response) {
   const testequery = await dbQuery('SELECT * from users');
   res.json({ teste: testequery.rows});
 }   
-
+*/
 // This will receive a user email and return all info(permeissions, etc)
+/*
 export async function getUserInfo(req: Request, res: Response) {
   //const { token } = req.params;
     const token = 'token_bob_smith'
@@ -61,3 +62,4 @@ export async function getUserInfo(req: Request, res: Response) {
   
   res.json(result);
 }
+*/

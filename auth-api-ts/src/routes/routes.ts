@@ -1,5 +1,5 @@
 import e, { Router } from "express";
-import { getUsers, getUserInfo} from "./handlers/users";
+//import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
 import { getLogin, login } from "./handlers/login";
 import { signup,getSignup } from "./handlers/signup";
