@@ -80,12 +80,12 @@ jobs:
     - name: Build docker image
       working-directory: Docker
       run: |
-       docker-compose -f docker-compose-deploy.yml build
+       docker-compose -f docker-compose.yml build
     
     - name: Build docker image
       working-directory: Docker
       run: |
-       docker-compose up -d
+       docker-compose -f docker-compose.yml up -d
 
   deploy:
     runs-on: ubuntu-latest
