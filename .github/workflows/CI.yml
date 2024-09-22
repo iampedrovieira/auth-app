@@ -17,59 +17,28 @@ jobs:
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: auth-api-ci-cd
       DATABASE_PORT: 5432
-      PROJECT_ROOT: ${{ github.workspace }}
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
   
     - name: Verify Docker Installation
       run : |
         docker --version
         docker-compose --version
 
-    - name: Check workspace path
-      working-directory: ${{ github.workspace }}
-      run: ls -la
-
-    - name: Set up Docker Compose
+    - name: Build docker image
+      working-directory: Docker
       run: |
-       docker-compose up
-
-    - name: Check Docker Compose services status
-      run: docker volume ls
-
-    - name: Check Docker Compose logs
-      run: docker-compose logs app
+       docker-compose build
     
-    - name: Wait for app service to be up
+    - name: Build docker image
+      working-directory: Docker
       run: |
-        timeout=180
-        elapsed=0
-        interval=5
-        while ! docker-compose exec app sh -c "ls -la /usr/src/app"; do
-          if [ $elapsed -ge $timeout ]; then
-            echo "Timeout reached. The app service did not start within 3 minutes."
-            exit 1
-          fi
-          echo "Waiting for app service to be up..."
-          sleep $interval
-          elapsed=$((elapsed + interval))
-        done
-    
-    - name: Check docker volume
-      run: docker-compose exec app sh -c "ls -la /usr/src/app"
-
-    - name: Check memory usage
-      run: docker stats --no-stream
-
-    - name: Check docker volume
-      run: docker-compose exec app sh -c "ls"
-
-    - name: Install Dependencies
-      run: docker-compose exec app sh -c "npm install"
+       docker-compose up -d
     
     - name: Run Linter
+      working-directory: Docker
       run: docker-compose exec app sh -c "npm run lint"
       continue-on-error: true
       
