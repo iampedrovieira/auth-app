@@ -89,7 +89,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [lint_and_test,build]
     container:
       image: docker:latest
       options: --privileged
