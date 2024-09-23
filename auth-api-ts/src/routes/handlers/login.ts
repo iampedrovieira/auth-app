@@ -98,3 +98,11 @@ export async function getLogin(req: Request<{},{},LoginDto>, res: Response<Respo
 
   return res.render('login', { msg: null,username: null });
 }
+
+export const githubLogin = (req: Request, res: Response) => {
+  const clientId = process.env.GITHUB_CLIENT_ID;
+  const redirectUri = 'http://localhost:3000/api/auth/callback';
+  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user`;
+
+  res.redirect(githubAuthUrl);
+};

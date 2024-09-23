@@ -10,9 +10,9 @@
     <div class="login-container">
       <div class="login-box">
         <h2>Log in</h2>
-        <% if (error) { %>
+        <% if (msg) { %>
         <div class="error-message" style="color: red">
-          <p><%= error %></p>
+          <p><%= msg %></p>
         </div>
         <% } %>
 
@@ -54,6 +54,13 @@
 
         <div class="forgot-password">
           <a href="#">Forgot your password?</a>
+        </div>
+
+        <div class="github-login">
+          <a href="/api/auth/github" class="github-btn">
+            <img src="/images/github-logo.png" alt="GitHub Logo" />
+            Log in with GitHub
+          </a>
         </div>
 
         <div class="signup">

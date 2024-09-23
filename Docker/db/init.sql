@@ -10,7 +10,8 @@ CREATE TABLE public.users (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL
+    password_hash VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE public.auth_providers (
@@ -21,15 +22,10 @@ CREATE TABLE public.auth_providers (
 CREATE TABLE public.user_auth_providers (
     user_id INT REFERENCES public.users(id) ON DELETE CASCADE,
     provider_id INT REFERENCES public.auth_providers(id) ON DELETE CASCADE,
+    token VARCHAR(255) NOT NULL,
     PRIMARY KEY (user_id, provider_id)
 );
 
-CREATE TABLE public.sessions (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES public.users(id),
-    token VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
 
 CREATE TABLE public.roles (
     id SERIAL PRIMARY KEY,
@@ -74,3 +70,8 @@ INSERT INTO permissions (name, description) VALUES
 ('update', 'Permission to update data'),
 ('add', 'Permission to add data user or permission on user'),
 ('remove', 'Permission to remove data user or permission on user');
+
+--Insert into providers table
+INSERT INTO auth_providers (name) VALUES
+('google'),
+('github');
