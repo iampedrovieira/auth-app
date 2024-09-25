@@ -5,9 +5,18 @@ import bcrypt from 'bcryptjs';
 import { LoginDto } from '../../dto/Login.dto';
 import { ResponseDto } from '../../dto/Response.dto';
 import { UserRepository } from '../../services/userService';
+import { login } from '../../utils/login';
 import { PoolClient } from 'pg';
 
-export async function login(req: Request<{},{},LoginDto>, res: Response<ResponseDto>,) {
+
+interface UserInfo {
+  name: string;
+  email: string;
+  username: string;
+  password_hash: string;
+}
+
+export async function loginHandler(req: Request<{},{},LoginDto>, res: Response<ResponseDto>,) {
   
   const username = req.body.username;
   const password = req.body.password;
@@ -21,12 +30,11 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
       return res.status(400).render('login', { msg: 'Bad Request'})
     }
   }
+
   const client = await dbBeginTransaction();
   try{
-     
-    const result = await UserRepository.getUserByUsername(username,client);
-
-    if (result.rowCount === 0) {
+    const userObj = await UserRepository.getUserByUsername(username,client);
+    if (userObj.rowCount === 0) {
 
       if (contentType && contentType.includes('application/json')) {
         res.status(401).json({ msg: 'Invalid credentials' });
@@ -38,7 +46,8 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
       dbCommitTransaction(client);
       return;
     }else{
-      const isPasswordValid = await bcrypt.compare(password, result.rows[0].password_hash);
+      const user :UserInfo = userObj.rows[0];
+      const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
       if (!isPasswordValid) {
         if (contentType && contentType.includes('application/json')) {
@@ -49,35 +58,20 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
         dbCommitTransaction(client);
         return;
       }
-      const tokePayload = {  
-        name: result.rows[0].name,
-        email: result.rows[0].email,
-        username: result.rows[0].username  
-      };
-      const token = jwt.sign(tokePayload, 'SECRET_KEY', { expiresIn: '1h' });
-      const resultUpdate = await UserRepository.updateUserToken(username, token,client);
-      if (resultUpdate.rowCount === 0) {
-        if (contentType && contentType.includes('application/json')) {
-          res.status(401).json({ msg: 'Internal Erro' });
-        } else {
-          res.status(401).render('login', { msg: 'Internal Erro',username: username})
-        }
-        dbCommitTransaction(client);
-        return;
-      }else{
-      
-        res.cookie('token', token, {
-          httpOnly: true, 
-          maxAge: 24 * 60 * 60 * 1000, 
-          sameSite: 'strict',
-        });
+      const token = await login(user,client);
+      //Create cookie
+      res.cookie('token', token, {
+        httpOnly: true, 
+        maxAge: 24 * 60 * 60 * 1000, 
+        sameSite: 'strict',
+      });
 
-        dbCommitTransaction(client);
-        return res.status(200).json({
-          msg:'OK',
-          token: token,
-        });
-      }
+      dbCommitTransaction(client);
+
+      return res.status(200).json({
+        msg:'OK',
+        token: token,
+      });
   }
 
   }catch(error){
@@ -89,7 +83,7 @@ export async function login(req: Request<{},{},LoginDto>, res: Response<Response
     } else {
       return res.status(500).render('login', { msg: 'Internal Error'})
     }
- 
+
   }
   
 };

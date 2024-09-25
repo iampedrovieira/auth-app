@@ -1,7 +1,7 @@
 import e, { Router } from "express";
 //import { getUsers, getUserInfo} from "./handlers/users";
 import { authorize } from "../middleware/authorization";
-import { getLogin, githubLogin, login } from "./handlers/login";
+import { getLogin, githubLogin, loginHandler } from "./handlers/login";
 import { signup,getSignup } from "./handlers/signup";
 import { addUserToObject, createObject, deleteObject, getObject, removeUserFromObject, updateObject } from "./handlers/object";
 import { authentication } from "../middleware/authentication";
@@ -13,7 +13,7 @@ const router = Router();
 router.get("/auth/github", githubLogin);
 router.get("/auth/login",getLogin);
 router.get("/auth/signup",getSignup);
-router.post("/login",login);
+router.post("/login",loginHandler);
 router.post("/signup",signup);
 router.get('/auth/callback',githubCallback);
 
