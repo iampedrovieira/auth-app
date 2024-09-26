@@ -13,7 +13,7 @@ export class UserRepository {
 	}
 	}
 
-  static async getUserByEmail(email: string, client: PoolClient) {
+  static async getUserByEmail(email: string, client: PoolClient):Promise<QueryResult> {
     try {
       const result = await dbQuery(`SELECT name, email, username, password_hash FROM USERS WHERE email = '${email}'`, client);
       return result;
@@ -23,7 +23,7 @@ export class UserRepository {
     }
   }
 
-	static async updateUserToken(username: string, token: string,client:PoolClient) {
+	static async updateUserToken(username: string, token: string,client:PoolClient):Promise<QueryResult> {
 		try {
       
 			const result = await dbQuery(`UPDATE USERS SET TOKEN = '${token}' WHERE username = '${username}'`,client);
@@ -35,14 +35,13 @@ export class UserRepository {
 		}
 		}
   
-  static async createUserFromProvider(username:string,email:string,name:string,client:PoolClient) {
+  static async createUser(username:string,email:string,name:string,password:string,client:PoolClient) :Promise<QueryResult>{
     try {
-      const result = await dbQuery(`INSERT INTO USERS (name, email, username) VALUES ('${name}', '${email}', '${username}')`, client);
+      const result = await dbQuery(`INSERT INTO USERS (username, password_hash, email, name) VALUES ('${username}', '${password}', '${email}', '${name}')`, client);
       return result;
     } catch (error) {
       console.log(error);
       throw error;
     }
   }
-
 }

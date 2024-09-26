@@ -1,20 +1,13 @@
 import { Request, Response } from 'express';
 import { dbBeginTransaction, dbCommitTransaction, dbQuery } from '../../db/db';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';    
 import { LoginDto } from '../../dto/Login.dto';
 import { ResponseDto } from '../../dto/Response.dto';
 import { UserRepository } from '../../services/userService';
 import { login } from '../../utils/login';
-import { PoolClient } from 'pg';
+import { UserInfo } from '../../types/user';
+import { cookieConfig } from '../../constants';
 
-
-interface UserInfo {
-  name: string;
-  email: string;
-  username: string;
-  password_hash: string;
-}
 
 export async function loginHandler(req: Request<{},{},LoginDto>, res: Response<ResponseDto>,) {
   
@@ -59,10 +52,10 @@ export async function loginHandler(req: Request<{},{},LoginDto>, res: Response<R
         return;
       }
       const token = await login(user,client);
-      //Create cookie
+      
       res.cookie('token', token, {
-        httpOnly: true, 
-        maxAge: 24 * 60 * 60 * 1000, 
+        httpOnly: cookieConfig.httpOnly, 
+        maxAge:cookieConfig.maxAge, 
         sameSite: 'strict',
       });
 
@@ -88,15 +81,18 @@ export async function loginHandler(req: Request<{},{},LoginDto>, res: Response<R
   
 };
 
-export async function getLogin(req: Request<{},{},LoginDto>, res: Response<ResponseDto>) {
+export function getLogin(req: Request<{},{},LoginDto>, res: Response<ResponseDto>) :void{
 
-  return res.render('login', { msg: null,username: null });
+  res.render('login', { msg: null,username: null });
+  return
 }
 
-export const githubLogin = (req: Request, res: Response) => {
+export const githubLogin = (req: Request, res: Response):void=> {
   const clientId = process.env.GITHUB_CLIENT_ID;
   const redirectUri = 'http://localhost:3000/api/auth/callback';
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user`;
-
   res.redirect(githubAuthUrl);
+  return
 };
+
+export { login };
