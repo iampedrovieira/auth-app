@@ -4,56 +4,26 @@ import { dbBeginTransaction, dbCommitTransaction, dbQuery } from "../../db/db";
 import { UserRepository } from "../../services/userService";
 import { UserAuthProviderRepository } from "../../services/userAuthProviderService";
 import { login } from "../../utils/login";
-import { GithubEmailResponse, GithubTokenResponse, GithubUser, ProviderInfo, UserInfo } from "../../types/user";
+import { GithubEmailResponse, GithubTokenResponse, GithubUser, GitHubUserResponse, ProviderInfo, UserInfo } from "../../types/user";
 import { cookieConfig, githubConfig } from "../../constants";
-
-
-//temp
-interface AxiosResponse<T> {
-  data: T;
-}
+import { ProviderRepository } from "../../services/providerService";
 
 export const githubCallback = async (req: Request, res: Response) : Promise<void>=> {
 
   const { code } = req.query;
 
-  const githubTokenResponse:AxiosResponse<GithubTokenResponse> = await axios.post(githubConfig.getAccessToken,
-    {
-      client_id: githubConfig.client_id,
-      client_secret: githubConfig.client_secret,
-      code,
-    },
-    {
-      headers: {
-        accept: 'application/json',
-      },
-    }
-  );
-
-  const githubToken :string = githubTokenResponse.data.access_token;
-  const githubEmailsResponse:AxiosResponse<GithubEmailResponse> = await axios.get(githubConfig.getUserEmails, {
-    headers: {
-      Authorization: `token ${githubToken}`,
-    },
-  });
-  const githubUserResponse:AxiosResponse<GithubUser> = await axios.get(githubConfig.getUserUser, {
-    headers: {
-      Authorization: `token ${githubToken}`,
-    },
-  });
-
-  const primaryEmailObj = githubEmailsResponse.data.find((email: { primary: boolean }) => email.primary);
-  
-  const primaryEmail = primaryEmailObj!.email;
+  const githubToken :string = await ProviderRepository.getProviderToken(code as string);
+  const githubUserInfo:GitHubUserResponse = await ProviderRepository.getUserInfo(githubToken);
+  const primaryEmail = await ProviderRepository.getPrimaryEmail(githubToken);
   const client = await dbBeginTransaction();
   
   try {
 		
 		let userObj = await UserRepository.getUserByEmail(primaryEmail,client);
     if (userObj.rowCount === 0) {
-      const username = githubUserResponse.data.login;
+      const username = githubUserInfo.login;
     
-      await UserRepository.createUser(username, primaryEmail, githubUserResponse.data.name, githubConfig.default_password,client);
+      await UserRepository.createUser(username, primaryEmail, githubUserInfo.name, githubConfig.default_password,client);
       userObj = await UserRepository.getUserByEmail(primaryEmail,client);
       await UserAuthProviderRepository.createUserAuthProvider(primaryEmail, githubToken, githubConfig.provider_name,client);
     

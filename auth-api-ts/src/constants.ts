@@ -7,7 +7,7 @@ export const githubConfig = {
     client_secret: process.env.GITHUB_SECRET,
     default_password: 'fromProvider',
     getAccessToken: 'https://github.com/login/oauth/access_token',
-    getUserUser: 'https://api.github.com/user',
+    getUserInfo: 'https://api.github.com/user',
     getUserEmails: 'https://api.github.com/user/emails',
 };
 
