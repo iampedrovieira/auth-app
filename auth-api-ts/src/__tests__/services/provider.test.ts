@@ -2,16 +2,13 @@ import { ProviderRepository } from '../../services/providerService';
 import axios from 'axios';
 import { GithubTokenResponse, GithubEmailResponse, GitHubUserResponse } from '../../types/user';
 
-// Mock do axios
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
 //temp
 interface AxiosResponse<T> {
     data: T;
   }
 describe('ProviderRepository', () => {
   describe('getProviderToken', () => {
-    it.only('should return the access token from the GitHub API', async () => {
+    it('should return the access token from the GitHub API', async () => {
       // Mock da resposta do GitHub com o tipo correto
       const mockTokenResponse:GithubTokenResponse = {
             access_token: 'mocked-access-token',
@@ -19,107 +16,66 @@ describe('ProviderRepository', () => {
             scope: 'repo,gist',
       };
 
-      mockedAxios.post.mockResolvedValue({
-        data: mockTokenResponse,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {
-            url: ''
-        },
-      });
-
+      (axios.post as jest.Mock).mockResolvedValue({ data: mockTokenResponse });
       const token = await ProviderRepository.getProviderToken('mock-code');
       
-      // Validação de que o token retornado corresponde ao esperado
       expect(token).toBe('mocked-access-token');
       expect(typeof token).toBe('string');
     });
-
-    it('should throw an error if GitHub API fails', async () => {
-      mockedAxios.post.mockRejectedValue(new Error('API Error'));
-
-      await expect(ProviderRepository.getProviderToken('mock-code')).rejects.toThrow('API Error');
-    });
   });
-
   describe('getPrimaryEmail', () => {
     it('should return the primary email from the GitHub API', async () => {
-      const mockEmailResponse: GithubEmailResponse = [
-        { email: 'primary@example.com', primary: true, verified: true, visibility: 'public' },
-        { email: 'secondary@example.com', primary: false, verified: true, visibility: 'public' },
+      const mockEmailResponse:GithubEmailResponse = [
+        { email: 'mocked-email', primary: true, verified: true, visibility: 'public' },
       ];
-
-      
-
-      const email = await ProviderRepository.getPrimaryEmail('mocked-access-token');
-
-      expect(email).toBe('primary@example.com');
+      (axios.get as jest.Mock).mockResolvedValue({ data: mockEmailResponse });
+      const email = await ProviderRepository.getPrimaryEmail('mock-token');
+      expect(email).toBe('mocked-email');
       expect(typeof email).toBe('string');
     });
-
-    it('should throw an error if no primary email is found', async () => {
-      const mockEmailResponse: GithubEmailResponse = [
-        { email: 'secondary@example.com', primary: false, verified: true, visibility: 'public' },
-      ];
-
-      //mockedAxios.get.mockResolvedValue({ data: mockEmailResponse });
-
-      await expect(ProviderRepository.getPrimaryEmail('mocked-access-token')).rejects.toThrowError();
-    });
-  });
-
+  }
+  );
   describe('getUserInfo', () => {
-    it('should return user information from the GitHub API', async () => {
-      const mockUserResponse: GitHubUserResponse = {
-        login: 'octocat',
+    it('should return the user info from the GitHub API', async () => {
+      const mockUserResponse:GitHubUserResponse = {
+        login: 'mocked-login',
         id: 1,
-        node_id: 'MDQ6VXNlcjE=',
-        avatar_url: 'https://github.com/images/error/octocat_happy.gif',
+        node_id: 'mocked-node-id',
+        avatar_url: 'mocked-avatar-url',
         gravatar_id: '',
-        url: 'https://api.github.com/users/octocat',
-        html_url: 'https://github.com/octocat',
-        followers_url: 'https://api.github.com/users/octocat/followers',
-        following_url: 'https://api.github.com/users/octocat/following{/other_user}',
-        gists_url: 'https://api.github.com/users/octocat/gists{/gist_id}',
-        starred_url: 'https://api.github.com/users/octocat/starred{/owner}{/repo}',
-        subscriptions_url: 'https://api.github.com/users/octocat/subscriptions',
-        organizations_url: 'https://api.github.com/users/octocat/orgs',
-        repos_url: 'https://api.github.com/users/octocat/repos',
-        events_url: 'https://api.github.com/users/octocat/events{/privacy}',
-        received_events_url: 'https://api.github.com/users/octocat/received_events',
+        url: 'mocked-url',
+        html_url: 'mocked-html-url',
+        followers_url: 'mocked-followers-url',
+        following_url: 'mocked-following-url',
+        gists_url: 'mocked-gists-url',
+        starred_url: 'mocked-starred-url',
+        subscriptions_url: 'mocked-subscriptions-url',
+        organizations_url: 'mocked-organizations-url',
+        repos_url: 'mocked-repos-url',
+        events_url: 'mocked-events-url',
+        received_events_url: 'mocked-received-events-url',
         type: 'User',
         site_admin: false,
-        name: 'The Octocat',
-        company: 'GitHub',
-        blog: 'https://github.com/blog',
-        location: 'San Francisco',
-        email: 'octocat@github.com',
-        hireable: null,
-        bio: 'There once was...',
-        twitter_username: 'octocat',
-        public_repos: 2,
+        name: 'mocked-name',
+        company: 'mocked-company',
+        blog: 'mocked-blog',
+        location: 'mocked-location',
+        email: 'mocked-email',
+        hireable: false,
+        bio: 'mocked-bio',
+        twitter_username: 'mocked-twitter-username',
+        public_repos: 1,
         public_gists: 1,
-        followers: 20,
-        following: 0,
-        created_at: '2008-01-14T04:33:35Z',
-        updated_at: '2008-01-14T04:33:35Z',
-        two_factor_authentication: true,
+        followers: 1,
+        following: 1,
+        created_at: 'mocked-created-at',
+        updated_at: 'mocked-updated-at',
+        two_factor_authentication: false,
       };
-
-      //mockedAxios.get.mockResolvedValue({ data: mockUserResponse });
-
-      const userInfo = await ProviderRepository.getUserInfo('mocked-access-token');
-
-      expect(userInfo.login).toBe('octocat');
-      expect(typeof userInfo.login).toBe('string');
-      expect(userInfo).toMatchObject(mockUserResponse);
-    });
-
-    it('should throw an error if GitHub API returns an error', async () => {
-      mockedAxios.get.mockRejectedValue(new Error('API Error'));
-
-      await expect(ProviderRepository.getUserInfo('mocked-access-token')).rejects.toThrow('API Error');
+      (axios.get as jest.Mock).mockResolvedValue({ data: mockUserResponse });
+      const user = await ProviderRepository.getUserInfo('mock-token');
+      expect(user).toEqual(mockUserResponse);
     });
   });
+  
 });

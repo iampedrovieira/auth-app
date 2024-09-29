@@ -1,5 +1,5 @@
 module.exports = {
-    sign: jest.fn(),
-    verify: jest.fn(),
-    decode: jest.fn(),
-  };
+  sign: jest.fn(),
+  verify: jest.fn(),
+  decode: jest.fn(),
+};
