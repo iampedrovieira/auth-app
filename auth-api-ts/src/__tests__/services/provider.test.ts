@@ -2,10 +2,7 @@ import { ProviderRepository } from '../../services/providerService';
 import axios from 'axios';
 import { GithubTokenResponse, GithubEmailResponse, GitHubUserResponse } from '../../types/user';
 
-//temp
-interface AxiosResponse<T> {
-    data: T;
-  }
+
 describe('ProviderRepository', () => {
   describe('getProviderToken', () => {
     it('should return the access token from the GitHub API', async () => {
