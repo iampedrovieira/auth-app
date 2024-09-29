@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "test:e2e": "jest --testPathPattern=src/e2e",
-    "test:unit": "jest --testPathPattern=src/__tests__",
+    "test": "jest --coverage",
+    "test:e2e": "jest --testPathPattern=src/e2e --coverage --coverageDirectory=coverage/e2e",
+    "test:unit": "jest --testPathPattern=src/__tests__ --coverage --coverageDirectory=coverage/unit",
     "lint": "eslint .",
     "build": "tsc --build",
     "start": "node dist/src/index.js",
