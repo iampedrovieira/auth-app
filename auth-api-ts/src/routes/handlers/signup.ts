@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { dbBeginTransaction, dbCommitTransaction, dbQuery, dbRollbackTransaction } from '../../db/db';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs'
+import { UserRepository } from '../../services/userService';
 
 export async function signup(req: Request, res: Response) {
   const { username, password, email, name } = req.body;
@@ -11,13 +12,10 @@ export async function signup(req: Request, res: Response) {
     return res.status(400).json({ error: 'Bad Request' });
   }
   const hashedPassword = await bcrypt.hash(password, 10);
-  const query = `INSERT INTO USERS (username, password_hash, email, name) 
-  VALUES ('${username}', '${hashedPassword}', '${email}', '${name}')`;
+
   try {
 	
-   
-    await dbQuery(query,client);
-    await dbCommitTransaction(client);
+    await UserRepository.createUser(username,email,name,hashedPassword,client);
 
     const tokenPayload = {  
       name: name,
@@ -26,12 +24,9 @@ export async function signup(req: Request, res: Response) {
     };
 		
     const token = jwt.sign(tokenPayload, 'SECRET_KEY', { expiresIn: '1h' });
-	
-    const queryUpdate = 
-    `UPDATE USERS SET TOKEN = '${token}' WHERE username = '${username}'`;
-
-    await dbBeginTransaction();
-    const resultUpdate = await dbQuery(queryUpdate,client);
+    
+    const resultUpdate = await UserRepository.updateUserToken(username,token,client);
+  
     
     if (resultUpdate.rowCount === 0) {
       await dbRollbackTransaction(client);
