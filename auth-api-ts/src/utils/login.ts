@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { UserRepository } from "../services/userService";
 import { PoolClient } from "pg";
 import { updateProviderToken } from "./providers";
@@ -32,5 +32,5 @@ function createToken(user:UserTokenPayload): string{
     email: user.email,
     username: user.username  
   };
-  return jwt.sign(tokePayload, jwtConfig.secret as string, { expiresIn: jwtConfig.expiresIn });
+  return jwt.sign(tokePayload, jwtConfig.secret as string, { expiresIn: jwtConfig.expiresIn } as SignOptions);
 }
