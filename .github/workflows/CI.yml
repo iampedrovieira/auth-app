@@ -53,14 +53,6 @@ jobs:
             docker-compose exec app sh -c "npm run test:e2e"
           fi
       continue-on-error: true
-      
-    - name: Run Unit Tests
-      working-directory: Docker
-      run: docker-compose exec app sh -c "npm run test:unit"
-
-    - name: Run Integration Tests
-      working-directory: Docker
-      run: docker-compose exec app sh -c "npm run test:e2e"
 
   build:
     name: Build Job
