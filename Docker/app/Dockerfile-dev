@@ -10,9 +10,7 @@ COPY ./auth-api-ts/package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
-COPY ./auth-api-ts .
-
+#Default value
 ENV API_PORT=3000
 
 # Expose the application port
