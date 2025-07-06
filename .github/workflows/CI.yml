@@ -52,7 +52,7 @@ jobs:
           elif [ "${{ matrix.job }}" == "integration-tests" ]; then
             docker-compose exec app sh -c "npm run test:e2e"
           fi
-      continue-on-error: true
+      #continue-on-error: true
 
   build:
     name: Build Job
