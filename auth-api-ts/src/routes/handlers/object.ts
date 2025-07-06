@@ -5,7 +5,6 @@ export async function getObject(req: Request, res: Response) {
 
   const {object} = req.params;
   const client = await dbBeginTransaction();
-
   const query = `
     SELECT o.name, o.description, array_agg(DISTINCT u.username) as usernames
     FROM objects o
@@ -40,7 +39,7 @@ export async function deleteObject(req: Request, res: Response) {
 
   try {
     const result = await dbQuery(query,client);
-    console.log(result);
+    
     if (result.rowCount === 0) {
       res.status(404).json({message: "Object not found"});
       return;
@@ -220,7 +219,7 @@ export async function createObject(req: Request, res: Response) {
 
   try {
     const objectResult = await dbQuery(checkObjectQuery,client);
-    console.log(objectResult);
+    
     if (objectResult.rowCount === 0) {
       const insertObjectQuery = `
       INSERT INTO objects (name, description) VALUES ('${name}', '${description}')

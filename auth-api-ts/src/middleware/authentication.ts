@@ -18,17 +18,26 @@ export function authentication() {
       if (contentType && contentType.includes('application/json')) {
         return res.status(401).json({ message: 'Unauthorized' });
       } else {
-        return res.render('login', { error: null,username: null})
+        return res.render('login', { msg: null,username: null})
       }
     }
 
-    jwt.verify(token, 'SECRET_KEY',  (err: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      
+      if (contentType && contentType.includes('application/json')) {
+        return res.status(500).json({ message: 'Internal Server Error' });
+      } else {
+        return res.render('login', { msg: 'Internal Server Error',username: null})
+      }
+    }
+    jwt.verify(token, jwtSecret,  (err: VerifyErrors | null, decoded: JwtPayload | string | undefined) => {
       if (err) {
         
         if (contentType && contentType.includes('application/json')) {
           return res.status(401).json({ message: 'Unauthorized' });
         } else {
-          return res.render('login', { error: null,username: null})
+          return res.render('login', { msg: 'Unauthorized',username: null})
         }
 
       }

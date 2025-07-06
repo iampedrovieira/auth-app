@@ -41,8 +41,8 @@ export const githubCallback = async (req: Request, res: Response) : Promise<void
       maxAge:cookieConfig.maxAge, 
       sameSite: 'strict',
     });
-      
-    res.redirect('http://localhost:3000/api/status');
+    
+    res.redirect(process.env.BASE_APP_URL+'/api/status');
     dbCommitTransaction(client);
     return
 	} catch (error) {

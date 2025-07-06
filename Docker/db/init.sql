@@ -11,7 +11,7 @@ CREATE TABLE public.users (
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
-    token VARCHAR(255) NOT NULL
+    token VARCHAR(255) NULL
 );
 
 CREATE TABLE public.auth_providers (
@@ -26,33 +26,16 @@ CREATE TABLE public.user_auth_providers (
     PRIMARY KEY (user_id, provider_id)
 );
 
-
-CREATE TABLE public.roles (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE public.user_roles (
-    user_id INT REFERENCES public.users(id),
-    role_id INT REFERENCES public.roles(id),
-    PRIMARY KEY (user_id, role_id)
-);
-
 CREATE TABLE public.permissions (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE public.role_permissions (
-    role_id INT REFERENCES public.roles(id),
-    permission_id INT REFERENCES public.permissions(id),
-    PRIMARY KEY (role_id, permission_id)
-);
-
 CREATE TABLE public.objects (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NULL,
 );
 
 CREATE TABLE public.user_permissions (
@@ -65,13 +48,25 @@ CREATE TABLE public.user_permissions (
 -- Insert into permissions table
 INSERT INTO permissions (name, description) VALUES
 ('read', 'Permission to read data'),
-('write', 'Permission to write data'),
 ('delete', 'Permission to delete data'),
-('update', 'Permission to update data'),
-('add', 'Permission to add data user or permission on user'),
-('remove', 'Permission to remove data user or permission on user');
+('update', 'Permission to update data')
+--('add', 'Permission to add permissions on user/obj'),
+--('remove', 'Permission to add permissions on user/obj')
+;
 
 --Insert into providers table
 INSERT INTO auth_providers (name) VALUES
 ('google'),
 ('github');
+
+CREATE OR REPLACE FUNCTION replace_hyphen_in_name()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.name = REPLACE(NEW.name, '-', '_');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER objects_name_replace_hyphen
+    BEFORE INSERT OR UPDATE ON objects
+    FOR EACH ROW
+    EXECUTE FUNCTION replace_hyphen_in_name();
