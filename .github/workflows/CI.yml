@@ -46,11 +46,11 @@ jobs:
       working-directory: Docker
       run: |
           if [ "${{ matrix.job }}" == "lint" ]; then
-            docker-compose exec app sh -c "npm run lint"
+            docker-compose exec -T app sh -c "npm run lint"
           elif [ "${{ matrix.job }}" == "unit-tests" ]; then
-            docker-compose exec app sh -c "npm run test:unit"
+            docker-compose exec -T app sh -c "npm run test:unit"
           elif [ "${{ matrix.job }}" == "integration-tests" ]; then
-            docker-compose exec app sh -c "npm run test:e2e"
+            docker-compose exec -T app sh -c "npm run test:e2e"
           fi
       continue-on-error: true
 
