@@ -21,7 +21,7 @@ jobs:
       DATABASE_PASSWORD: postgres
       DATABASE_NAME: auth-api-ci-cd
       DATABASE_PORT: 5432
-      ENVIRONMENT: -dev
+      ENVIRONMENT: -ci
 
     steps:
     - name: Checkout code
